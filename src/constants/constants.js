@@ -1,1 +1,1 @@
-export const DB_NAME = "UBER_BACKEND"
+export const DB_NAME = "uber"
