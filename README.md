@@ -127,3 +127,120 @@ Example request body:
 - The response sets `accessToken` and `refreshToken` cookies.
 - Ensure `Content-Type: application/json` is set when sending the request.
 - Credentials must match an existing user account.
+
+## `POST /users/profile`
+
+Returns the current authenticated user's profile.
+
+### Description
+This endpoint returns the logged-in user's profile data. It requires a valid access token and uses the authenticated user from the request.
+
+### Request URL
+`POST /users/profile`
+
+### Authentication
+- Requires a valid `accessToken` sent via cookies or request headers as provided by the login flow.
+
+### Responses
+
+- `200 OK`
+  - Returned when the access token is valid.
+  - Response includes the authenticated user's profile, excluding `password` and `refreshToken`.
+
+- `401 Unauthorized`
+  - Returned when the user is not authenticated or the access token is missing/invalid.
+
+- `402 Payment Required`
+  - Returned when the authenticated user could not be found.
+
+### Example Success Response
+
+```json
+{
+  "status": 200,
+  "data": {
+    "_id": "645e4f5d6b89d2f7e6c12345",
+    "firstname": "John",
+    "lastname": "Doe",
+    "email": "john.doe@example.com",
+    "createdAt": "2026-04-10T12:34:56.789Z",
+    "updatedAt": "2026-04-10T12:34:56.789Z"
+  },
+  "message": "user profile given!!"
+}
+```
+
+## `POST /users/logout`
+
+Logs the current user out and clears authentication cookies.
+
+### Description
+This endpoint clears the user's `accessToken` and `refreshToken` cookies and resets the refresh token stored in the database.
+
+### Request URL
+`POST /users/logout`
+
+### Authentication
+- Requires a valid `accessToken` sent via cookies or request headers.
+
+### Responses
+
+- `200 OK`
+  - Returned when logout succeeds.
+  - Response confirms the user has been logged out.
+
+- `401 Unauthorized`
+  - Returned when the user is not authenticated or the access token is missing/invalid.
+
+### Example Success Response
+
+```json
+{
+  "status": 200,
+  "data": {},
+  "message": "user loggedOut successfully !!"
+}
+```
+
+## `POST /users/refresh-token`
+
+Refreshes the user's access token using a valid refresh token.
+
+### Description
+This endpoint verifies the provided refresh token, issues a new access token, rotates the refresh token, and sets both tokens in cookies.
+
+### Request URL
+`POST /users/refresh-token`
+
+### Request Body (JSON)
+
+- `refreshToken` (string, optional): The refresh token if not sent in cookies.
+
+### Responses
+
+- `201 Created`
+  - Returned when the refresh token is valid.
+  - Response includes the new `accessToken` and `refreshToken`.
+
+- `401 Unauthorized`
+  - Returned when the refresh token is missing, invalid, expired, or does not match the stored token.
+
+- `402 Payment Required`
+  - Returned when the user linked to the refresh token cannot be found.
+
+### Example Success Response
+
+```json
+{
+  "status": 201,
+  "data": {
+    "accessToken": "<jwt-access-token>",
+    "refreshToken": "<jwt-refresh-token>"
+  },
+  "message": "accessToken refreshed succesfuuly !!"
+}
+```
+
+### Notes
+- The endpoint accepts the refresh token in cookies or in the request body.
+- It rotates the refresh token on each successful call.
