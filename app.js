@@ -13,14 +13,14 @@ app.use(cors())
 app.use(cookieParser());
 app.use(express.urlencoded({extended:true}))
 
-app.get("/",(req,res)=>{
-    res.send("hello world")
-})
 
 
 // rotues
 import userRouter from "./src/routes/user.routes.js";
-
+import captainRouter from "./src/routes/captain.routes.js";
+// user-routes
 app.use("/api/v1/users",userRouter)
+// captain-routes
+app.use("/api/v1/captain",captainRouter)
 
 export default app;

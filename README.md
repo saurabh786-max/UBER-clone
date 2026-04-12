@@ -244,3 +244,98 @@ This endpoint verifies the provided refresh token, issues a new access token, ro
 ### Notes
 - The endpoint accepts the refresh token in cookies or in the request body.
 - It rotates the refresh token on each successful call.
+
+## `POST /captain/register`
+
+Registers a new captain in the system.
+
+### Description
+This endpoint creates a new captain account using the provided vehicle and profile information. It validates required fields and checks whether the email already exists before creating the captain.
+
+### Request URL
+`POST /captain/register`
+
+### Request Body (JSON)
+
+- `firstname` (string, required): The first name of the captain. Must be at least 3 characters long.
+- `lastname` (string, optional): The last name of the captain.
+- `email` (string, required): The captain's email address.
+- `password` (string, required): The password for the captain account.
+- `vehicle` (object, required): The vehicle details for the captain, including:
+  - `color` (string, required): Vehicle color.
+  - `plate` (string, required): Vehicle plate number.
+  - `capacity` (number, required): Passenger capacity. Must be at least 1.
+  - `vehcleType` (string, required): Vehicle type. Allowed values: `car`, `motorcycle`, `auto`.
+  - `location` (object, optional): Current vehicle location.
+    - `lat` (number, optional): Latitude.
+    - `lng` (number, optional): Longitude.
+
+Example request body:
+
+```json
+{
+  "firstname": "Jane",
+  "lastname": "Doe",
+  "email": "jane.doe@example.com",
+  "password": "securePass123",
+  "vehicle": {
+    "color": "blue",
+    "plate": "ABC1234",
+    "capacity": 4,
+    "vehcleType": "car",
+    "location": {
+      "lat": 37.7749,
+      "lng": -122.4194
+    }
+  }
+}
+```
+
+### Responses
+
+- `200 OK`
+  - Returned when the captain is successfully registered.
+  - Response includes the newly created captain data, excluding `password` and `refreshToken`.
+
+- `400 Bad Request`
+  - Returned when required validation fails.
+  - Example reasons: missing required fields, invalid vehicle data, or strings too short.
+
+- `402 Payment Required`
+  - Returned when a captain with the same email already exists.
+
+- `500 Internal Server Error`
+  - Returned when captain creation fails unexpectedly.
+
+### Example Success Response
+
+```json
+{
+  "status": 200,
+  "data": {
+    "_id": "645e4f5d6b89d2f7e6c12345",
+    "firstname": "Jane",
+    "lastname": "Doe",
+    "email": "jane.doe@example.com",
+    "vehicle": {
+      "color": "blue",
+      "plate": "ABC1234",
+      "capacity": 4,
+      "vehcleType": "car",
+      "location": {
+        "lat": 37.7749,
+        "lng": -122.4194
+      }
+    },
+    "status": "inactive",
+    "createdAt": "2026-04-12T12:34:56.789Z",
+    "updatedAt": "2026-04-12T12:34:56.789Z"
+  },
+  "message": "captain registered successfully "
+}
+```
+
+### Notes
+- Ensure `Content-Type: application/json` is set when sending the request.
+- Passwords are hashed before saving.
+- The endpoint is mounted under `/api/v1/captain` in the main server routing.
