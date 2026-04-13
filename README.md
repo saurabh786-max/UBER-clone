@@ -245,7 +245,13 @@ This endpoint verifies the provided refresh token, issues a new access token, ro
 - The endpoint accepts the refresh token in cookies or in the request body.
 - It rotates the refresh token on each successful call.
 
-## `POST /captain/register`
+## Captain endpoints
+
+All captain routes are mounted under `/api/v1/captain`.
+
+---
+
+## `POST /api/v1/captain/register`
 
 Registers a new captain in the system.
 
@@ -253,7 +259,7 @@ Registers a new captain in the system.
 This endpoint creates a new captain account using the provided vehicle and profile information. It validates required fields and checks whether the email already exists before creating the captain.
 
 ### Request URL
-`POST /captain/register`
+`POST /api/v1/captain/register`
 
 ### Request Body (JSON)
 
@@ -338,4 +344,136 @@ Example request body:
 ### Notes
 - Ensure `Content-Type: application/json` is set when sending the request.
 - Passwords are hashed before saving.
-- The endpoint is mounted under `/api/v1/captain` in the main server routing.
+
+---
+
+## `POST /api/v1/captain/login`
+
+Authenticates a captain and returns access and refresh tokens.
+
+### Request URL
+`POST /api/v1/captain/login`
+
+### Request Body (JSON)
+
+- `email` (string, required): The captain's email address.
+- `password` (string, required): The captain's password.
+
+### Responses
+
+- `201 Created`
+  - Returned when credentials are valid.
+  - Response includes the captain profile, `accessToken`, and `refreshToken`.
+
+- `400 Bad Request`
+  - Returned when request validation fails.
+
+- `402 Payment Required`
+  - Returned when the captain is not found or the password is invalid.
+
+### Example Success Response
+
+```json
+{
+  "status": 201,
+  "data": {
+    "captain": {
+      "_id": "645e4f5d6b89d2f7e6c12345",
+      "firstname": "Jane",
+      "lastname": "Doe",
+      "email": "jane.doe@example.com",
+      "vehicle": {
+        "color": "blue",
+        "plate": "ABC1234",
+        "capacity": 4,
+        "vehcleType": "car"
+      },
+      "status": "inactive",
+      "createdAt": "2026-04-12T12:34:56.789Z",
+      "updatedAt": "2026-04-12T12:34:56.789Z"
+    },
+    "accessToken": "<jwt-access-token>",
+    "refreshToken": "<jwt-refresh-token>"
+  },
+  "message": "captain logged in successfully "
+}
+```
+
+---
+
+## `GET /api/v1/captain/profile`
+
+Returns the authenticated captain's profile.
+
+### Request URL
+`GET /api/v1/captain/profile`
+
+### Authentication
+- Requires a valid `accessToken` sent via cookies or the `Authorization: Bearer <token>` header.
+
+### Responses
+
+- `201 Created`
+  - Returned when the access token is valid.
+  - Response includes the authenticated captain profile, excluding `password` and `refreshToken`.
+
+- `401 Unauthorized`
+  - Returned when the captain is not authenticated or the access token is missing/invalid.
+
+- `402 Payment Required`
+  - Returned when the authenticated captain could not be found.
+
+### Example Success Response
+
+```json
+{
+  "status": 201,
+  "data": {
+    "_id": "645e4f5d6b89d2f7e6c12345",
+    "firstname": "Jane",
+    "lastname": "Doe",
+    "email": "jane.doe@example.com",
+    "vehicle": {
+      "color": "blue",
+      "plate": "ABC1234",
+      "capacity": 4,
+      "vehcleType": "car"
+    },
+    "status": "inactive",
+    "createdAt": "2026-04-12T12:34:56.789Z",
+    "updatedAt": "2026-04-12T12:34:56.789Z"
+  },
+  "message": "provided Captain profile !!!"
+}
+```
+
+---
+
+## `GET /api/v1/captain/logout`
+
+Logs the authenticated captain out and clears authentication tokens.
+
+### Request URL
+`GET /api/v1/captain/logout`
+
+### Authentication
+- Requires a valid `accessToken` sent via cookies or the `Authorization: Bearer <token>` header.
+
+### Responses
+
+- `201 Created`
+  - Returned when logout succeeds.
+  - Response confirms the captain has been logged out.
+
+- `401 Unauthorized`
+  - Returned when the captain is not authenticated or the access token is missing/invalid.
+
+### Example Success Response
+
+```json
+{
+  "status": 201,
+  "data": {},
+  "message": "captain logged out successfully !!"
+}
+```
